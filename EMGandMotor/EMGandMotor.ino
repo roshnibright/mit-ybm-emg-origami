@@ -35,7 +35,7 @@
  // Servo Config
  // ----------------------
  Servo myServo;
- const int servoPin = 5;           // Servo pin / 서보 핀
+ const int servoPin = 7;           // Servo pin / 서보 핀
  const int homeAngle = 0;          // Rest position / 휴식 위치
  const int forwardAngle = 60;      // Active position / 활성 위치
  bool servoForward = false;
