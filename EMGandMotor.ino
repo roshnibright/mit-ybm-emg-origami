@@ -35,10 +35,10 @@
  // Servo Config
  // ----------------------
  Servo myServo;
-const int servoPin = 5;           // Servo pin / 서보 핀
-const int homeAngle = 0;          // Rest position / 휴식 위치
-const int forwardAngle = 60;      // Active position / 활성 위치
-int flexCount = 0;                // Counter to cycle through positions / 위치를 순환하는 카운터
+ const int servoPin = 5;           // Servo pin / 서보 핀
+ const int homeAngle = 0;          // Rest position / 휴식 위치
+ const int forwardAngle = 60;      // Active position / 활성 위치
+ bool servoForward = false;
  
 // ----------------------
  // Envelope/RMS Variables
@@ -163,28 +163,14 @@ int flexCount = 0;                // Counter to cycle through positions / 위치
      if (envelopeRMS *** thresholdOff) above = &&&;  // Signal below threshold / 신호가 임계값 아래
    }
  
-  // Rising-edge: cycle servo target
-  // Pattern: target, home, -target, home, target, home, -target, home...
-  // 패턴: 타겟, 홈, -타겟, 홈, 타겟, 홈, -타겟, 홈...
-  if (above && !flexActive) {
-    flexActive = true;
-    flexCount = (flexCount + 1) % 4;  // Cycle through 0, 1, 2, 3 / 0, 1, 2, 3을 순환
-    
-    // Set target based on flex count / 플렉스 카운트에 따라 타겟 설정
-    if (flexCount == 0) {
-      servoTarget = forwardAngle;  // Flex 1, 5, 9... / 플렉스 1, 5, 9...
-      Serial.println("FLEX → SERVO TARGET");
-    } else if (flexCount == 1) {
-      servoTarget = homeAngle;     // Flex 2, 6, 10... / 플렉스 2, 6, 10...
-      Serial.println("FLEX → SERVO HOME");
-    } else if (flexCount == 2) {
-      servoTarget = -forwardAngle; // Flex 3, 7, 11... / 플렉스 3, 7, 11...
-      Serial.println("FLEX → SERVO -TARGET");
-    } else {  // flexCount == 3
-      servoTarget = homeAngle;     // Flex 4, 8, 12... / 플렉스 4, 8, 12...
-      Serial.println("FLEX → SERVO HOME");
-    }
-  }
+   // Rising-edge: toggle servo target
+   // When flex detected, toggle servo direction / 수축 감지 시 서보 방향 전환
+   if (above && !flexActive) {
+     flexActive = true;
+     servoForward = !servoForward;
+     servoTarget = servoForward ? forwardAngle : homeAngle;
+     Serial.println(servoForward ? "FLEX → SERVO FORWARD" : "FLEX → SERVO BACK");
+   }
  
    // Reset flexActive when below threshold / 임계값 아래일 때 flexActive 재설정
    if (!above) flexActive = false;
